@@ -21,11 +21,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# imagemagick decodes both DDS and TGA portrait sources from nwn-haks; sharp
+# alone (libvips) handles TGA but not DDS. Shell out via convert(1) for the
+# decode + resize + WebP encode in a single subprocess; cache result on disk.
+RUN apk add --no-cache imagemagick
+
 # Non-root user for the runtime — matches what create-next-app's standalone
 # template expects. Sharp's prebuilt binaries handle musl on alpine via the
 # linux-musl target it pulls in automatically.
 RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
+
+# Portrait cache lives on a Coolify-managed volume so it survives redeploys.
+RUN mkdir -p /var/cache/portraits && chown nextjs:nodejs /var/cache/portraits
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
