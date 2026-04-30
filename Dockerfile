@@ -24,7 +24,9 @@ ENV HOSTNAME=0.0.0.0
 # imagemagick decodes both DDS and TGA portrait sources from nwn-haks; sharp
 # alone (libvips) handles TGA but not DDS. Shell out via convert(1) for the
 # decode + resize + WebP encode in a single subprocess; cache result on disk.
-RUN apk add --no-cache imagemagick
+# libwebp-tools provides the cwebp delegate that imagemagick shells out to
+# for WebP output — it's not bundled with the imagemagick alpine package.
+RUN apk add --no-cache imagemagick libwebp-tools
 
 # Non-root user for the runtime — matches what create-next-app's standalone
 # template expects. Sharp's prebuilt binaries handle musl on alpine via the
