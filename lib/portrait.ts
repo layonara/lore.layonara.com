@@ -30,6 +30,15 @@ export interface PortraitOptions {
 // mounted read-only at /portraits via Coolify persistent storage.
 const PORTRAIT_ROOT = process.env.PORTRAITS_DIR ?? "/portraits";
 const CACHE_DIR = process.env.PORTRAIT_CACHE_DIR ?? "/var/cache/portraits";
+
+// Bump this whenever the convert pipeline changes — it's part of every cache
+// filename, so old WebPs orphan and the route rebuilds on next request. Also
+// include it in the public URL via portraitUrl() so the long Cache-Control
+// max-age doesn't trap clients on a stale rendering.
+//   v1: initial release (identity convert + resize)
+//   v2: -flip on DDS sources (BioWare bottom-up scan order) + north-anchored
+//       80% height crop to drop the empty bottom strip BioWare's UI hid
+export const PORTRAIT_VERSION = 2;
 const CACHE_MAX_BYTES = Number(
   process.env.PORTRAIT_CACHE_MAX_BYTES ?? 1024 * 1024 * 1024,
 );
@@ -70,7 +79,7 @@ export function sanitizeResref(raw: string): string {
 }
 
 function cachePath(resref: string, width: number): string {
-  return path.join(CACHE_DIR, `${resref}_${width}.webp`);
+  return path.join(CACHE_DIR, `v${PORTRAIT_VERSION}_${resref}_${width}.webp`);
 }
 
 async function findSource(resref: string): Promise<string | null> {
@@ -90,20 +99,34 @@ async function ensureCacheDir(): Promise<void> {
   await mkdir(CACHE_DIR, { recursive: true });
 }
 
-// Run `convert <src> -resize <w>x -quality 82 webp:<dst>`. Aspect ratio is
-// preserved via `<w>x` (height auto). Quality 82 is a good portrait sweet
-// spot — visibly indistinguishable from the source TGA at ~25KB for 256w.
+// Run `convert <src> [-flip] -gravity north -crop 100%x80%+0+0 +repage
+//                     -resize <w>x -quality 82 webp:<dst>`.
+//
+// Two NWN-isms baked in:
+// (1) DDS files are stored bottom-up (DirectX scan order); ImageMagick decodes
+//     them as-loaded, so the result lands upside-down. TGA is right-side-up.
+//     We flip only when the source is .dds.
+// (2) NWN portrait sources are 1:2 with the BioWare engine displaying only the
+//     top ~80%; the bottom strip is empty padding. We replicate that crop so
+//     the lore site renders the same framing players see in-game.
 async function magickConvert(
   source: string,
   destination: string,
   width: number,
 ): Promise<void> {
+  const isDds = source.toLowerCase().endsWith(".dds");
+  const args = [source];
+  if (isDds) args.push("-flip");
+  args.push(
+    "-gravity", "north",
+    "-crop", "100%x80%+0+0",
+    "+repage",
+    "-resize", `${width}x`,
+    "-quality", "82",
+    `webp:${destination}`,
+  );
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(
-      "convert",
-      [source, "-resize", `${width}x`, "-quality", "82", `webp:${destination}`],
-      { stdio: ["ignore", "ignore", "pipe"] },
-    );
+    const child = spawn("convert", args, { stdio: ["ignore", "ignore", "pipe"] });
     let stderr = "";
     child.stderr.on("data", (chunk) => {
       stderr += chunk.toString();

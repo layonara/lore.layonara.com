@@ -13,7 +13,7 @@ export function PortraitCard({ character }: { character: CharacterListItem }) {
       href={`/characters/${character.slug}`}
       className="group relative flex flex-col overflow-hidden rounded-xl border border-forge-border bg-forge-surface/60 transition hover:border-forge-accent/60 hover:bg-forge-surface focus-visible:border-forge-accent focus-visible:outline-none"
     >
-      <div className="relative aspect-[1/2] w-full overflow-hidden bg-forge-bg">
+      <div className="relative aspect-[5/8] w-full overflow-hidden bg-forge-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={portraitUrl(character.portrait_resref, 192)}

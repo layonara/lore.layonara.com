@@ -290,7 +290,14 @@ export async function getCharacterRecipes(id: number, limit = 25) {
 // Convenience: portrait URL builder for use in <Image> / <img>. Always
 // hits our own /api/portrait route so the WebP cache pipeline is the
 // single point of truth — no direct nwn-haks paths leak to the client.
+//
+// The `&v=` parameter is a cache buster — bump it (and PORTRAIT_VERSION in
+// lib/portrait.ts) whenever the convert pipeline changes, so the long
+// immutable Cache-Control doesn't trap clients on a stale rendering. The
+// server doesn't read this param; it just uses it to invalidate the URL.
+const PORTRAIT_URL_VERSION = 2;
+
 export function portraitUrl(resref: string | null | undefined, width = 128): string {
   if (!resref) return `/portrait-placeholder.webp`;
-  return `/api/portrait/${encodeURIComponent(resref)}?w=${width}`;
+  return `/api/portrait/${encodeURIComponent(resref)}?w=${width}&v=${PORTRAIT_URL_VERSION}`;
 }
