@@ -1,10 +1,168 @@
 @import "tailwindcss";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/alegreya";
+@import "@fontsource-variable/jetbrains-mono";
 
+/* Forge design tokens — ported from layonara-forge so the whole Layonara
+ * surface area shares one design language. Hue 65 is the warm "forge"
+ * amber that ties the in-world flavor together.
+ *
+ * Dark is the default; toggling .light on <html> swaps the palette.
+ * Light values are kept identical to Forge so a future theme switcher
+ * Just Works. */
+:root {
+  --forge-bg: oklch(15% 0.01 65);
+  --forge-surface: oklch(20% 0.012 65);
+  --forge-surface-raised: oklch(24% 0.014 65);
+  --forge-border: oklch(30% 0.014 65);
+  --forge-accent: oklch(58% 0.155 65);
+  --forge-accent-hover: oklch(63% 0.16 65);
+  --forge-accent-subtle: oklch(25% 0.04 65);
+  --forge-accent-text: oklch(15% 0.03 65);
+  --forge-text: oklch(93% 0.006 65);
+  --forge-text-secondary: oklch(68% 0.01 65);
+
+  --forge-success: oklch(62% 0.14 150);
+  --forge-success-bg: oklch(22% 0.03 150);
+  --forge-success-border: oklch(35% 0.06 150);
+  --forge-danger: oklch(68% 0.14 25);
+  --forge-danger-bg: oklch(22% 0.04 25);
+  --forge-danger-border: oklch(35% 0.08 25);
+  --forge-danger-strong: oklch(55% 0.18 25);
+  --forge-warning: oklch(72% 0.14 80);
+  --forge-warning-bg: oklch(25% 0.04 80);
+  --forge-warning-border: oklch(40% 0.07 80);
+  --forge-info: oklch(62% 0.08 230);
+  --forge-info-bg: oklch(22% 0.02 230);
+
+  --font-sans: "Manrope Variable", system-ui, sans-serif;
+  --font-heading: "Alegreya Variable", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", "Fira Code", monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+}
+
+:root.light {
+  --forge-bg: oklch(95% 0.008 65);
+  --forge-surface: oklch(99% 0.004 65);
+  --forge-surface-raised: oklch(100% 0.002 65);
+  --forge-border: oklch(82% 0.012 65);
+  --forge-accent: oklch(50% 0.155 65);
+  --forge-accent-hover: oklch(45% 0.16 65);
+  --forge-accent-subtle: oklch(90% 0.04 65);
+  --forge-accent-text: oklch(99% 0.005 65);
+  --forge-text: oklch(20% 0.012 65);
+  --forge-text-secondary: oklch(45% 0.015 65);
+
+  --forge-success: oklch(45% 0.14 150);
+  --forge-success-bg: oklch(92% 0.03 150);
+  --forge-success-border: oklch(70% 0.08 150);
+  --forge-danger: oklch(50% 0.16 25);
+  --forge-danger-bg: oklch(92% 0.03 25);
+  --forge-danger-border: oklch(70% 0.08 25);
+  --forge-danger-strong: oklch(45% 0.18 25);
+  --forge-warning: oklch(55% 0.14 80);
+  --forge-warning-bg: oklch(92% 0.04 80);
+  --forge-warning-border: oklch(70% 0.07 80);
+  --forge-info: oklch(45% 0.08 230);
+  --forge-info-bg: oklch(92% 0.02 230);
+}
+
+/* Tailwind v4 reads design tokens through @theme. Map every Forge variable
+ * into a `forge-*` colour and the heading/mono fonts so we can use
+ * `bg-forge-surface`, `text-forge-text-secondary`, `font-heading`, etc. */
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-forge-bg: var(--forge-bg);
+  --color-forge-surface: var(--forge-surface);
+  --color-forge-surface-raised: var(--forge-surface-raised);
+  --color-forge-border: var(--forge-border);
+  --color-forge-accent: var(--forge-accent);
+  --color-forge-accent-hover: var(--forge-accent-hover);
+  --color-forge-accent-subtle: var(--forge-accent-subtle);
+  --color-forge-accent-text: var(--forge-accent-text);
+  --color-forge-text: var(--forge-text);
+  --color-forge-text-secondary: var(--forge-text-secondary);
+  --color-forge-success: var(--forge-success);
+  --color-forge-success-bg: var(--forge-success-bg);
+  --color-forge-success-border: var(--forge-success-border);
+  --color-forge-danger: var(--forge-danger);
+  --color-forge-danger-bg: var(--forge-danger-bg);
+  --color-forge-danger-border: var(--forge-danger-border);
+  --color-forge-danger-strong: var(--forge-danger-strong);
+  --color-forge-warning: var(--forge-warning);
+  --color-forge-warning-bg: var(--forge-warning-bg);
+  --color-forge-warning-border: var(--forge-warning-border);
+  --color-forge-info: var(--forge-info);
+  --color-forge-info-bg: var(--forge-info-bg);
+
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
 }
 
 body {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--forge-bg);
+  color: var(--forge-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--forge-accent-subtle);
+  color: var(--forge-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--forge-accent);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--forge-border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--forge-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--forge-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
