@@ -32,9 +32,19 @@ export default function Home() {
           Knowledge of the realm.
         </h1>
         <p className="mx-auto mt-6 max-w-md text-balance text-base leading-relaxed text-forge-text-secondary">
-          A growing collection of player tools and references for the world of
-          Layonara. Characters, items, recipes, areas — coming soon.
+          Player tools and references for the world of Layonara. Items,
+          recipes, and areas to follow.
         </p>
+
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/characters"
+            className="inline-flex items-center gap-2 rounded-full border border-forge-accent/60 bg-forge-accent/15 px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] text-forge-accent transition hover:bg-forge-accent/25 hover:text-forge-text"
+          >
+            Browse characters
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
 
         <nav className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-forge-text-secondary">
           <Link
@@ -62,10 +72,6 @@ export default function Home() {
             About
           </Link>
         </nav>
-
-        <p className="mt-16 font-mono text-[10px] uppercase tracking-[0.25em] text-forge-text-secondary/60">
-          Phase 0 · placeholder
-        </p>
       </main>
     </div>
   );
