@@ -26,9 +26,18 @@ export interface PortraitOptions {
   width: number;
 }
 
-// In the container the host path /opt/layonara/nwn-haks/portraits is bind-
-// mounted read-only at /portraits via Coolify persistent storage.
-const PORTRAIT_ROOT = process.env.PORTRAITS_DIR ?? "/portraits";
+// In the container the host paths are bind-mounted read-only via Coolify
+// persistent storage:
+//   /opt/layonara/nwsync-builder/layo-haks/portraits        -> /portraits
+//   /opt/layonara/nwsync-builder/layo-haks/portraits-stock  -> /portraits-stock
+// /portraits is the layonara hak set (custom). /portraits-stock contains the
+// ~6,400 BioWare stock portraits extracted via `nwn_resman_extract` from a
+// full NWN:EE install — these are referenced by .bic files but never shipped
+// in the haks because the engine pulls them from data/ at runtime. We search
+// haks first so any local override wins, then fall back to stock.
+const PORTRAIT_ROOTS = (
+  process.env.PORTRAITS_DIRS ?? `${process.env.PORTRAITS_DIR ?? "/portraits"}:/portraits-stock`
+).split(":").filter(Boolean);
 const CACHE_DIR = process.env.PORTRAIT_CACHE_DIR ?? "/var/cache/portraits";
 
 // Bump this whenever the convert pipeline changes — it's part of every cache
@@ -41,7 +50,10 @@ const CACHE_DIR = process.env.PORTRAIT_CACHE_DIR ?? "/var/cache/portraits";
 //   v3: tighten crop to wiki-spec 25/32 of canvas (78.125%) — all NWN
 //       portrait sizes use this exact ratio per
 //       https://nwn.wiki/spaces/NWN1/pages/38174997/portraits.2da
-export const PORTRAIT_VERSION = 3;
+//   v4: add /portraits-stock fallback for ~6,400 BioWare stock portraits
+//       referenced by .bic files but absent from the layonara haks. Browser
+//       cache bust needed because URLs that previously 404'd now resolve.
+export const PORTRAIT_VERSION = 4;
 const CACHE_MAX_BYTES = Number(
   process.env.PORTRAIT_CACHE_MAX_BYTES ?? 1024 * 1024 * 1024,
 );
@@ -86,13 +98,20 @@ function cachePath(resref: string, width: number): string {
 }
 
 async function findSource(resref: string): Promise<string | null> {
-  for (const suffix of SOURCE_PRIORITY) {
-    const candidate = path.join(PORTRAIT_ROOT, `${resref}${suffix}`);
-    try {
-      await access(candidate);
-      return candidate;
-    } catch {
-      // Try next suffix.
+  // Roots are searched in declared order (haks before stock) so a custom
+  // hak portrait overrides any same-named stock one, matching engine
+  // resolution. Suffixes are searched per-root so we get the highest
+  // available quality from the first root that has the resref at all,
+  // rather than ever stepping down quality just to fall through to stock.
+  for (const root of PORTRAIT_ROOTS) {
+    for (const suffix of SOURCE_PRIORITY) {
+      const candidate = path.join(root, `${resref}${suffix}`);
+      try {
+        await access(candidate);
+        return candidate;
+      } catch {
+        // Try next suffix.
+      }
     }
   }
   return null;

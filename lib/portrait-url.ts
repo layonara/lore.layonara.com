@@ -7,7 +7,7 @@
 // lib/portrait.ts) whenever the convert pipeline changes, so the long
 // immutable Cache-Control doesn't trap clients on a stale rendering. The
 // server doesn't read this param; it just uses it to invalidate the URL.
-export const PORTRAIT_URL_VERSION = 3;
+export const PORTRAIT_URL_VERSION = 4;
 
 export function portraitUrl(
   resref: string | null | undefined,
