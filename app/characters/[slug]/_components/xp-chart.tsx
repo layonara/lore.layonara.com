@@ -3,12 +3,32 @@
 // XP timeline chart. ag-charts is canvas-based and a hard client-only
 // component, so this is the second JS island on the detail page (after
 // the search box on the list page).
+//
+// ag-charts v13 made modules opt-in: nothing renders unless we explicitly
+// register the chart type, series, and axes we use. We do it once at module
+// scope so the registration happens before <AgCharts> ever mounts.
 
 // ag-charts-community v13 ships its styles inline via the JS bundle;
 // no separate CSS import is needed (and there is no styles/ subpath).
 import { AgCharts } from "ag-charts-react";
-import type { AgCartesianChartOptions } from "ag-charts-community";
+import {
+  AreaSeriesModule,
+  CartesianChartModule,
+  ModuleRegistry,
+  NumberAxisModule,
+  TimeAxisModule,
+  type AgCartesianChartOptions,
+} from "ag-charts-community";
 import { useMemo } from "react";
+
+// Module registration is global + idempotent — the registry de-dupes — so
+// running it on every import is safe and just no-ops after the first call.
+ModuleRegistry.registerModules([
+  CartesianChartModule,
+  AreaSeriesModule,
+  TimeAxisModule,
+  NumberAxisModule,
+]);
 
 interface XpChartProps {
   samples: Array<{ t: number; xp: number }>;
