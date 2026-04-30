@@ -16,7 +16,7 @@ import {
 } from "react";
 
 import { cn } from "@/lib/cn";
-import { portraitUrl } from "@/lib/characters";
+import { portraitUrl } from "@/lib/portrait-url";
 
 interface SearchHit {
   slug: string | null;
