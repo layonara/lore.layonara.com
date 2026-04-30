@@ -295,7 +295,7 @@ export async function getCharacterRecipes(id: number, limit = 25) {
 // lib/portrait.ts) whenever the convert pipeline changes, so the long
 // immutable Cache-Control doesn't trap clients on a stale rendering. The
 // server doesn't read this param; it just uses it to invalidate the URL.
-const PORTRAIT_URL_VERSION = 2;
+const PORTRAIT_URL_VERSION = 3;
 
 export function portraitUrl(resref: string | null | undefined, width = 128): string {
   if (!resref) return `/portrait-placeholder.webp`;

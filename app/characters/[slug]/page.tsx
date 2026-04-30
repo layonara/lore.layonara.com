@@ -109,9 +109,9 @@ export default async function CharacterPage({ params }: PageProps) {
             src={portraitUrl(character.portrait_resref, 384)}
             alt={`Portrait of ${heroName}`}
             width={280}
-            height={448}
+            height={438}
             decoding="async"
-            className="aspect-[5/8] w-full rounded-2xl border border-forge-border object-cover shadow-lg"
+            className="aspect-[16/25] w-full rounded-2xl border border-forge-border object-cover shadow-lg"
           />
           <div className="space-y-2 rounded-xl border border-forge-border bg-forge-surface/60 px-4 py-4 text-sm">
             <KvRow label="Player" value={heroPlayer} accent />

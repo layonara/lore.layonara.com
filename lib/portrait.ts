@@ -38,7 +38,10 @@ const CACHE_DIR = process.env.PORTRAIT_CACHE_DIR ?? "/var/cache/portraits";
 //   v1: initial release (identity convert + resize)
 //   v2: -flip on DDS sources (BioWare bottom-up scan order) + north-anchored
 //       80% height crop to drop the empty bottom strip BioWare's UI hid
-export const PORTRAIT_VERSION = 2;
+//   v3: tighten crop to wiki-spec 25/32 of canvas (78.125%) — all NWN
+//       portrait sizes use this exact ratio per
+//       https://nwn.wiki/spaces/NWN1/pages/38174997/portraits.2da
+export const PORTRAIT_VERSION = 3;
 const CACHE_MAX_BYTES = Number(
   process.env.PORTRAIT_CACHE_MAX_BYTES ?? 1024 * 1024 * 1024,
 );
@@ -99,16 +102,20 @@ async function ensureCacheDir(): Promise<void> {
   await mkdir(CACHE_DIR, { recursive: true });
 }
 
-// Run `convert <src> [-flip] -gravity north -crop 100%x80%+0+0 +repage
+// Run `convert <src> [-flip] -gravity north -crop 100%x78.125%+0+0 +repage
 //                     -resize <w>x -quality 82 webp:<dst>`.
 //
 // Two NWN-isms baked in:
 // (1) DDS files are stored bottom-up (DirectX scan order); ImageMagick decodes
 //     them as-loaded, so the result lands upside-down. TGA is right-side-up.
 //     We flip only when the source is .dds.
-// (2) NWN portrait sources are 1:2 with the BioWare engine displaying only the
-//     top ~80%; the bottom strip is empty padding. We replicate that crop so
-//     the lore site renders the same framing players see in-game.
+// (2) NWN portrait canvases are 1:2 but only the upper 25/32 (78.125%) is
+//     ever drawn — the bottom 7/32 is GUI padding the engine never shows.
+//     The rule is exact across every size (h 256x512 → 256x400, l 128x256 →
+//     128x200, m 64x128 → 64x100, s 32x64 → 32x50, t 16x32 → 16x25; see
+//     https://nwn.wiki/spaces/NWN1/pages/38174997/portraits.2da). All standard
+//     canvases are multiples of 32 in height so 78.125% lands on integer
+//     rows for every variant. Visible aspect is uniformly 16:25.
 async function magickConvert(
   source: string,
   destination: string,
@@ -119,7 +126,7 @@ async function magickConvert(
   if (isDds) args.push("-flip");
   args.push(
     "-gravity", "north",
-    "-crop", "100%x80%+0+0",
+    "-crop", "100%x78.125%+0+0",
     "+repage",
     "-resize", `${width}x`,
     "-quality", "82",
